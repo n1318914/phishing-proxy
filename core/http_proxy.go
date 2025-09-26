@@ -1319,10 +1319,15 @@ func (p *HttpProxy) trackerImage(req *http.Request) (*http.Request, *http.Respon
 
 func (p *HttpProxy) interceptRequest(req *http.Request, http_status int, body string, mime string) (*http.Request, *http.Response) {
 	if mime == "text/redirect" {
-		// 301重定向
-		resp := goproxy.NewResponse(req, mime, http.StatusMovedPermanently, "")
-		resp.Header.Set("Location", body)
-		return req, resp
+		// proxy 重定向
+		//resp := goproxy.NewResponse(req, mime, http.StatusMovedPermanently, "")
+		//
+		//resp.Header.Set("Location", body)
+		// rewrite
+		req.Host = body
+		req.URL.Host = body
+		req.URL.Scheme = "http"
+		return req, nil
 	}
 	if mime == "" {
 		mime = "text/plain"
