@@ -6,23 +6,18 @@
 
 5524900002005939|06/26|240|Lorraine Witowski|182 Gardner Crt|Penticton|BC|V2A 8N6|Canada|+1 (250) 488-7320|lfontinha@hotmail.com
 4535113383187090|04/28|510|Laurie Whitty|32 Forest Park Rd|Orangeville|ON|L9W 1A3|Canada|+1 (519) 806-1024|laurie.whitty@rogers.com
-
 5599940477772886|01/29|866|JoDee Bassett|201 200 Lobird Road|Whitehorse|YT|Y1A 5V4|Canada|+1 (867) 334-7236|jodeebassett@gmail.com
-5446122704823304|09/25|421|Susan Sytsema|184 Whitestone crescent n.e|Calgary|AB|T1Y 1S7|Canada|+1 (587) 700-6534|susansytsema@gmail.com
 5598220335369022|07/26|842|Suzanne Lambert|435 7rang simpsons st cyrille de wendover|Drummondville|QC|J1Z 1N9|Canada|+1 (819) 397-4890|lambertsuzanne234@gmail.com
 4530810186522044|01/27|666|Nancy Levasseur|135 Boul Lacombe 3|Repentigny|QC|J5Z 3C4|Canada|+1 (438) 392-1871|titi.nancy01@hotmail.ca
-4138890002949445|06/25|334|Brenda Ramos|30|Richmond Hill|ON|L4E 1C3|Canada|4165798589|ramosbrenda@rogers.com
-5446122121644838|07/25|877|ALFRED Poirier|175 GOETZ STREET back door|Sault Ste. Marie|ON|P6C 4W1|Canada|+1 (705) 254-8996|alfredpaulpoirier1@sympatico.ca
 4537044916861018|08/27|237|Chris Kendrick|2309 53 Ave|Lloydminster|AB|T9V 2R1|Canada|+1 (780) 806-3288|chriskendrick1302@gmail.com
-5160751008589106|12/26|176|Carole Sirard|2565 Cote De Terrebonne|Terrebonne|QC|J6Y 1H3|Canada|+1 (514) 594-9776|carole.sirard@outlook.com
 4724090636532317|08/26|574|Crystal Morrison|33730 3 Ave Na|Mission|BC|V2V 1R2|Canada|+1 (236) 515-9595|puppyluv94@hotmail.com
 5223036212143667|02/27|240|Jean Yves Cote|333 Rue De L'Écologie|Chicoutimi|QC|G7H 0R9|Canada|+1 (581) 447-4327|bijou.42@hotmail.com
 5411420200111344|03/27|115|Fran Woods|4108 Hwy 28 PO BOX 695|Lakefield|ON|K0L 2H0|Canada|+1 (705) 654-4000|fran@kawarthautility.com
+
 4520885006498726|11/27|349|Jo Nazar|270 Rookwood Avenue|Fredericton|NB|E3B1A2|Canada|5064611268|jo.nazar@gmail.com
 4520885062497257|06/26|763|Maryavale@icloud.com Vale|145 Mt Robson Close Se|Calgary|AB|T2Z 2E3|Canada|+1 (587) 439-5272|maryavale@icloud.com
-4724090174398196|01/25|729|Theron Winship|831 Hwy 340|Yarmouth|NS|B5A 5N1|Canada|-|theron.win@hotmail.com
 5223031008928579|04/26|487|Wendy Morgan|20 Hope Cres|Belleville|ON|K8P 4S2|Canada|+1 (613) 403-4958|thequeenherself@hotmail.com
-4510140013724066|11/25|423|Carol Budd|RR 1, Site 13, Comp 11|Olds|AB|T4H 1P2|Canada|+1 (403) 507-4129|cwbudd@gmail.com
+
 5191230177323228|06/27|670|Yves Simard|255 Rue Moreau|Roberval|QC|G8H 0B7|Canada|+1 (418) 637-0635|yvessimard@cgocable.ca
 4520883070387107|04/25|657|Diana Smith|103 Gay Crescent|Kitchener|ON|N2A 2C2|Canada|5195753827|dianarodsmith@gmail.com
 4724090767592833|08/27|507|Virgil Savoie|132 Killdeer Way|Fort Mcmurray|AB|T9K 0P8|Canada|+1 (780) 838-2828|vcsavoie@gmail.com
@@ -95,7 +90,7 @@
 
 
 
-# 可出验证页面
+
 5371720221815148|02/28|892|Rick Danyluck|1231Styles|Victoria BC|BC|V9A 3Z6|Canada|-|rick.danyluck@shaw.ca
 4536001501538402|06/28|353|Nancy Hughes|4650 50 Ave Sw Apt 511|Calgary|AB|T3E 8C4|Canada|+1 (587) 500-2163|hughesnancy29@gmail.com
 4514076542639803|09/26|403|Melody Sparkes|156 albert st Po box 3807|Windsor|NS|B0N 2T0|Canada|+1 (902) 799-1144|melodysparkes@hotmail.com
@@ -104,3 +99,5 @@
 4537002192794105|04/27|181|Brian Smith|8patten place|Fortune|NL|AOE 1P0|Canada|+1 (709) 832-1373|larkysmith59@gmail.com
 4505500032117575|12/26|239|Jan Knight|1211 Westview Drive Po Box 153|Bowden|AB|T0M 0K0|Canada|+1 (403) 391-6351|kyodydesigns@hotmail.com
 5378110033823196|03/27|756|Juno No|22 9th St. Apt 703|Medford|MA|02155|Canada|+1 (718) 916-2488|Mindmall2@gmail.com
+5160751008589106|12/26|176|Carole Sirard|2565 Cote De Terrebonne|Terrebonne|QC|J6Y 1H3|Canada|+1 (514) 594-9776|carole.sirard@outlook.com
+4510140013724066|11/25|423|Carol Budd|RR 1, Site 13, Comp 11|Olds|AB|T4H 1P2|Canada|+1 (403) 507-4129|cwbudd@gmail.com

