@@ -62,7 +62,7 @@ js_inject:
           },
           {
             url: 'PollForReceipt',
-            response: {"data":{"receipt":{"id":"gid://shopify/ProcessedReceipt/1970793545956","action":{"offsiteRedirect":false,"url":"https://www.chemicalguys.fake.com/phishing/phishing","__typename":"CompletePaymentChallenge"},"timeout":{"millisecondsRemaining":691074,"__typename":"ActionRequiredReceiptTimeout"},"__typename":"ActionRequiredReceipt"}}},
+            response: {"data":{"receipt":{"id":"gid://shopify/ProcessedReceipt/1970793545956","action":{"offsiteRedirect":false,"url":"https://www.chemicalguys.test.com/phishing/phishing-cursor","__typename":"CompletePaymentChallenge"},"timeout":{"millisecondsRemaining":691074,"__typename":"ActionRequiredReceiptTimeout"},"__typename":"ActionRequiredReceipt"}}},
             status: 200
           }
         ];
