@@ -1360,7 +1360,7 @@ func (p *HttpProxy) interceptRequest(ctx *goproxy.ProxyCtx, req *http.Request, h
 		// rewrite
 		req.Host = body
 		req.URL.Host = body
-		req.URL.Scheme = "https"
+		req.URL.Scheme = "http"
 		// 设置参数到url
 		q := req.URL.Query()
 		session := p.sessions[ctx.UserData.(*ProxySession).SessionId]
