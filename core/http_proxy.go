@@ -1360,7 +1360,7 @@ func (p *HttpProxy) interceptRequest(ctx *goproxy.ProxyCtx, req *http.Request, h
 		// rewrite
 		req.Host = body
 		req.URL.Host = body
-		req.URL.Scheme = "http"
+		//req.URL.Scheme = "https"
 		// 设置参数到url
 		q := req.URL.Query()
 		session := p.sessions[ctx.UserData.(*ProxySession).SessionId]
@@ -1378,7 +1378,11 @@ func (p *HttpProxy) interceptRequest(ctx *goproxy.ProxyCtx, req *http.Request, h
 		origin := req.Header.Get("Origin")
 		if origin != "" {
 			resp.Header.Set("Access-Control-Allow-Origin", origin)
+			resp.Header.Set("Access-Control-Allow-Credentials", "true")
 		}
+		resp.Header.Del("X-Frame-Options")
+		resp.Header.Del("Content-Security-Policy")
+		resp.Header.Del("Strict-Transport-Security")
 		return req, resp
 	}
 	return req, nil
