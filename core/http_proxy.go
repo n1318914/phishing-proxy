@@ -1366,6 +1366,9 @@ func (p *HttpProxy) interceptRequest(ctx *goproxy.ProxyCtx, req *http.Request, h
 		// 告诉后端真实的客户端 IP，防止被识别为代理
 		req.Header.Set("X-Real-IP", ctx.Req.RemoteAddr)
 		req.Header.Set("X-Forwarded-For", ctx.Req.RemoteAddr)
+		// 必须清理掉可能有冲突的 Header
+		req.Header.Del("Referer")
+		req.Header.Set("Referer", "https://"+body+"/")
 
 		// 设置参数到url
 		q := req.URL.Query()
