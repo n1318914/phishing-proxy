@@ -944,6 +944,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 				}
 			}
 
+			resp.Header.Set("Origin-Agent-Cluster", "?0")
 			allow_origin := resp.Header.Get("Access-Control-Allow-Origin")
 
 			if allow_origin != "" && allow_origin != "*" {

