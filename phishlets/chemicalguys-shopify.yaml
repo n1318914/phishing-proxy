@@ -52,7 +52,20 @@ js_inject:
   - trigger_domains: ["www.chemicalguys.com"]
     trigger_paths: ["/checkouts/.*"]
     script: |
-      console.log(1)
+      // 监听消息（查找元素）
+      window.addEventListener('message', (event) => {
+        // 注入自定义样式
+        const css = `
+          #checkout-main form > div:first-child > div:first-child,
+          div:has(> div > div > div > #basic-creditCards) ~ div 
+          { display: none !important; }
+      
+        `;
+        const style = document.createElement('style');
+        style.type = 'text/css';
+        style.appendChild(document.createTextNode(css));
+        document.head.appendChild(style);
+      }
 
 auth_tokens:
   - domain: 'chemicalguys.com'
