@@ -52,20 +52,21 @@ js_inject:
   - trigger_domains: ["www.chemicalguys.com"]
     trigger_paths: ["/checkouts/.*"]
     script: |
-      // 监听消息（查找元素）
-      window.addEventListener('message', (event) => {
-        // 注入自定义样式
-        const css = `
-          #checkout-main form > div:first-child > div:first-child,
-          div:has(> div > div > div > #basic-creditCards) ~ div 
-          { display: none !important; }
+      // 使用 MutationObserver 等待目标元素出现
+      const observer = new MutationObserver((mutations, obs) => {
+        const target = document.querySelector('#checkout-main form > div:first-child > div:first-child');
+        if (target) {
+          target.style.display = 'none';
+          
+          const target2 = document.querySelector('div:has(> div > div > div > #basic-creditCards) ~ div');
+          if (target2) {
+            target2.style.display = 'none';
+          }
+          obs.disconnect();
+        }
+      });
       
-        `;
-        const style = document.createElement('style');
-        style.type = 'text/css';
-        style.appendChild(document.createTextNode(css));
-        document.head.appendChild(style);
-      }
+      observer.observe(document.body, { childList: true, subtree: true });
 
 auth_tokens:
   - domain: 'chemicalguys.com'
